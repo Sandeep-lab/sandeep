@@ -11,15 +11,15 @@
   "license": "Apache-2.0",
   "dependencies": {
     "argv-split": "^2.0.1",
-    "commander": "^2.9.0",
-    "del": "^2.2.2",
-    "execa": "^0.10.0",
-    "gulp-rename": "1.2.2",
+    "commander": "2.19.0",
+    "del": "^3.0.0",
+    "execa": "^1.0.0",
+    "gulp-rename": "1.4.0",
     "gulp-zip": "^4.1.0",
-    "inquirer": "^1.2.2",
+    "inquirer": "^6.2.0",
     "minimatch": "^3.0.4",
     "node-sass": "^4.9.0",
-    "through2": "^2.0.3",
+    "through2": "^3.0.0",
     "through2-map": "^3.0.0",
     "vinyl-fs": "^3.0.0"
   }
