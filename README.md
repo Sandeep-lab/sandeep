@@ -1,5 +1,7 @@
 # Kibana 7.0.0-alpha1
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/elastic/kibana.svg)](https://greenkeeper.io/)
+
 Kibana is your window into the [Elastic Stack](https://www.elastic.co/products). Specifically, it's a browser-based analytics and search dashboard for Elasticsearch.
 
 - [Getting Started](#getting-started)
