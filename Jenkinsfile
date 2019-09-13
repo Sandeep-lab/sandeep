@@ -1,7 +1,14 @@
 #!/bin/groovy
 
 properties([
+  buildDiscarder(logRotator(daysToKeepStr: '30')),
+  disableConcurrentBuilds(),
+  disableResume(),
+  [$class: 'GithubProjectProperty', displayName: 'Kibana', projectUrlStr: 'https://github.com/elastic/kibana/'],
+  [$class: 'LeastLoadDisabledProperty', leastLoadDisabled: true],
   durabilityHint('PERFORMANCE_OPTIMIZED'),
+  rateLimitBuilds([throttle: [count: 1, durationName: 'second', userBoost: false]]),
+  pipelineTriggers([githubPush()])
 ])
 
 stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a little bit
