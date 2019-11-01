@@ -65,7 +65,7 @@ const COLUMNS = {
   },
   modified_date: {
     label: i18n.translate('xpack.indexLifecycleMgmt.policyTable.headers.modifiedDateHeader', {
-      defaultMessage: 'Modified date',
+      defaultMessage: 'Modified dates',
     }),
     width: 200,
   },

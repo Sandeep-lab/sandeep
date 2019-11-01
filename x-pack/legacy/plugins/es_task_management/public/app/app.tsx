@@ -20,6 +20,7 @@ import { useCore } from './app_context';
 
 import { documentationService } from './services/documentation';
 import { breadcrumbService } from './services/navigation';
+import { TasksHome } from './sections';
 
 export const App = () => {
   const {
@@ -70,6 +71,7 @@ export const App = () => {
   return (
     <EuiPageBody>
       <EuiPageContent>{renderPageHeader()}</EuiPageContent>
+      <TasksHome></TasksHome>
     </EuiPageBody>
   );
 };
