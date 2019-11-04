@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { TasksHome } from './home';
+export { TaskList } from './task_list';

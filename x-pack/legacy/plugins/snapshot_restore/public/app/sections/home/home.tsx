@@ -67,7 +67,7 @@ export const SnapshotRestoreHome: React.FunctionComponent<RouteComponentProps<Ma
       name: (
         <FormattedMessage
           id="xpack.snapshotRestore.home.repositoriesTabTitle"
-          defaultMessage="RepositoriesF"
+          defaultMessage="Repositories"
         />
       ),
     },

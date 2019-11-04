@@ -4,23 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
-import {
-  EuiButton,
-  EuiInMemoryTable,
-  EuiLink,
-  Query,
-  EuiLoadingSpinner,
-  EuiToolTip,
-  EuiButtonIcon,
-} from '@elastic/eui';
+import React from 'react';
+import { EuiInMemoryTable } from '@elastic/eui';
+import { useCore } from '../../app_context';
 
-export const TasksHome: React.FunctionComponent<Props> = ({}) => {
-  const {
-    core: { i18n },
-  } = useAppDependencies();
-  const { FormattedMessage } = i18n;
-  const { trackUiMetric } = uiMetricService;
+export const TaskList: React.FunctionComponent = () => {
+  const { i18n } = useCore();
 
   const columns = [
     {
