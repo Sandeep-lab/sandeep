@@ -1,5 +1,5 @@
 [[setup]]
-= Set Up Kibana
+= Set up Kibana
 
 [partintro]
 --
