@@ -12,16 +12,18 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const browser = getService('browser');
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
+  const expectedCount = 16;
 
   describe('Endpoints List Page', function() {
     this.tags(['skipCloud']);
     before(async () => {
-      esArchiver.load('endpoint/endpoints');
+      esArchiver.load('endpoint/pagination');
       await pageObjects.common.navigateToApp('endpoint');
+      await pageObjects.endpoint.navToEndpointList();
     });
 
     after(async () => {
-      await esArchiver.unload('endpoint/endpoints');
+      await esArchiver.unload('endpoint/pagination');
     });
 
     it('Navigate to Endpoints list page', async () => {
@@ -40,6 +42,19 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       for (let i = 0; i < endpointList.length; i++) {
         expect(await endpointList[i].getVisibleText()).to.be('Windows Server 2016');
       }
+    });
+
+    it('Shows the right number of pages for n number of documents', async () => {
+      // change row view
+      await pageObjects.endpoint.changeRowView();
+      // select 5 rows
+      await pageObjects.endpoint.selectFiveRows();
+      // check that we are on page 1
+      const validateFirstPageClass = await pageObjects.endpoint.checkFirstPageIsActive();
+      expect(validateFirstPageClass).to.be(true);
+      // validate that we have 5 items on the page
+      const actualCount = await pageObjects.endpoint.getAllEndpointListRowsCount();
+      expect(actualCount).to.be(expectedCount);
     });
   });
 };
