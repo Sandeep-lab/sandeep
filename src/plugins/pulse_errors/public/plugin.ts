@@ -20,6 +20,7 @@
 import { Plugin, CoreSetup, CoreStart } from 'kibana/public';
 import { Subject, Subscription } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import moment from 'moment';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { PulseChannel } from 'src/core/public/pulse/channel';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
@@ -31,13 +32,17 @@ export class PulseErrorsPlugin implements Plugin<PulseErrorsPluginSetup, PulseEr
   private instructionsSubscription?: Subscription;
   private noFixedVersionsSeen: Set<string> = new Set();
   private errorsChannel?: PulseChannel<ErrorInstruction>;
+  private readonly fixedErrors = new Map<string, ErrorInstruction>();
 
   public async setup(core: CoreSetup) {
     this.errorsChannel = core.pulse.getChannel('errors');
-    errorChannelPayloads.forEach(element => {
-      // tmp disable errors channel
-      // core.pulse.getChannel('errors').sendPulse(element)
-    });
+    (window as any).throwErrors = () => {
+      errorChannelPayloads().forEach(element => {
+        // const existing = this.fixedErrors.get(element.hash);
+        // core.pulse.getChannel('errors').sendPulse({ ...existing, ...element });
+        core.pulse.getChannel('errors').sendPulse(element);
+      });
+    };
   }
 
   public start(core: CoreStart) {
@@ -50,16 +55,35 @@ export class PulseErrorsPlugin implements Plugin<PulseErrorsPluginSetup, PulseEr
       .pipe(takeUntil(this.stop$))
       .subscribe(instructions => {
         if (instructions && instructions.length) {
-          instructions.forEach((instruction: any) => {
-            // @ts-ignore-next-line this should be refering to the instruction, not the raw es document
-            if (instruction) {
-              if (!instruction.fixedVersion && !this.noFixedVersionsSeen.has(instruction.hash))
-                core.notifications.toasts.addError(new Error(JSON.stringify(instruction)), {
-                  // @ts-ignore-next-line
+          instructions.forEach(instruction => {
+            if (instruction.fixedVersion) {
+              this.fixedErrors.set(instruction.hash, instruction);
+            }
+
+            if (
+              instruction.status === 'new' &&
+              // !this.validSeenOn(instruction.timestamp, instruction.seenOn) &&
+              window.location.hash !== '#/dev_tools/console'
+            ) {
+              if (!instruction.fixedVersion && !this.noFixedVersionsSeen.has(instruction.hash)) {
+                core.notifications.toasts.addError(new Error(instruction.message), {
                   title: `Error:${instruction.hash}`,
                   toastMessage: `An error occurred: ${instruction.message}. The error has been reported to Pulse`,
                 });
-              this.noFixedVersionsSeen.add(instruction.hash);
+              } else if (instruction.fixedVersion) {
+                core.notifications.toasts.addError(new Error(instruction.message), {
+                  title: `Error:${instruction.hash}`,
+                  toastMessage: `An error occurred: ${instruction.message}`,
+                });
+              }
+              const timestamp = new Date().toISOString();
+              this.errorsChannel!.sendPulse({
+                ...instruction,
+                seenOn: timestamp,
+                status: 'seen',
+                timestamp,
+              });
+              // this.noFixedVersionsSeen.add(instruction.hash);
             }
           });
         }
