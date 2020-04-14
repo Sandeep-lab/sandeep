@@ -1,10 +1,21 @@
 #!/bin/bash
 
-while getopts c:d:g:h:r:t:x:k: option; do
+
+regExpHeadCommit="HEAD is now at ([a-zA-Z0-9]+) (.*) (\(#([0-9]+)\))?"
+gitHeadLine=""
+gitHash=""
+prNumber=""
+gitDescription=""
+throttle=""
+FULL_EXTERNAL_PATH=""
+gitDate=""
+
+while getopts c:d:e:g:h:r:t:x:k: option; do
   case "${option}" in
 
   c) CHERRY_PICKS=${OPTARG} ;;
   d) PACKET_DELAY=${OPTARG} ;;
+  e) EXTERNAL_PATH=${OPTARG} ;;
   g) GREP=${OPTARG} ;;
   h) GIT_HEAD=${OPTARG} ;;
   k) KILL=${OPTARG} ;;
@@ -28,21 +39,16 @@ setDefaults() {
   if [ "$THROTTLED" != "" ]; then
     throttle="true"
   fi
-
-}
-
-printInitVars() {
-  echo "### GIT_HEAD: ${GIT_HEAD}"
-  echo "### RUN_COUNT: ${RUN_COUNT}"
-  echo "### PACKET_DELAY: ${PACKET_DELAY}"
-  echo "### GREP: ${GREP}"
-  echo "### XPACK: ${XPACK}"
-  echo "### CHERRY_PICKS: ${CHERRY_PICKS}"
-  echo "### THROTTLED: ${THROTTLED}"
 }
 
 changeDirToRoot() {
   pushd ../../../../ >/dev/null
+}
+createExternalPath() {
+  mkdir -p $EXTERNAL_PATH
+}
+changeDirToExternalPath() {
+  pushd $EXTERNAL_PATH
 }
 
 fetchOrigin() {
@@ -54,6 +60,7 @@ resetGit() {
   echo "### Syncing to GIT_HEAD: ${GIT_HEAD}"
   lines=$(git reset --hard ${GIT_HEAD})
   echo "### lines: ${lines}"
+  gitDate=$(git show -s --format=%cI ${gitHash})
 }
 
 parseGit() {
@@ -65,9 +72,7 @@ parseGit() {
     gitHash="${BASH_REMATCH[1]}"
     gitDescription="${BASH_REMATCH[2]}"
     prNumber="${BASH_REMATCH[4]}"
-    echo "### gitHash: ${gitHash}"
-    echo "### gitDescription: ${gitDescription}"
-    echo "### prNumber: ${prNumber}"
+    echo "### Parsed Git -> Hash: ${gitHash} description: ${gitDescription} prNumber: ${prNumber}"
   fi
 
   # Note:
@@ -121,21 +126,30 @@ bootstrapKibana() {
   node scripts/build_kibana_platform_plugins
 }
 
-throttle=""
+printInitVars() {
+  echo "### FULL_EXTERNAL_PATH: ${FULL_EXTERNAL_PATH}"
+  echo "### GIT_DATE: ${GIT_DATE}"
+  echo "### GIT_HEAD: ${GIT_HEAD}"
+  echo "### RUN_COUNT: ${RUN_COUNT}"
+  echo "### PACKET_DELAY: ${PACKET_DELAY}"
+  echo "### EXTERNAL_PATH: ${EXTERNAL_PATH}"
+  echo "### GREP: ${GREP}"
+  echo "### XPACK: ${XPACK}"
+  echo "### CHERRY_PICKS: ${CHERRY_PICKS}"
+  echo "### THROTTLED: ${THROTTLED}"
+}
+
+printVars() {
+  printInitVars
+}
 
 setDefaults
-printInitVars
-changeDirToRoot
+createExternalPath
+changeDirToExternalPath
 fetchOrigin
-
-regExpHeadCommit="HEAD is now at ([a-zA-Z0-9]+) (.*) (\(#([0-9]+)\))?"
-gitHeadLine=
-gitHash=
-prNumber=
-gitDescription=
-
 resetGit
 parseGit
+printVars
 [[ ! -z "$KILL" ]] && maybeExit
 [[ ! -z "$CHERRY_PICKS" ]] && cherryPickCommits
 export NODE_OPTIONS="--max_old_space_size=4096"
@@ -144,19 +158,15 @@ nvm use
 cleanEs
 bootstrapKibana
 
-gitDate=$(git show -s --format=%cI ${gitHash})
-#echo "### gitDate: ${gitDate}"
-#logstashTracking="PACKET_DELAY:${PACKET_DELAY} GIT_HASH:${gitHash} DESCRIPTION:\"${gitDescription}\" GIT_DATE:${gitDate}"
-#logstashTracking="PACKET_DELAY:${PACKET_DELAY} GIT_HEAD:${GIT_HEAD} GIT_HASH:${gitHash} DESCRIPTION:\"${gitDescription}\" GIT_DATE:${gitDate}"
+##echo "### gitDate: ${gitDate}"
+##logstashTracking="PACKET_DELAY:${PACKET_DELAY} GIT_HASH:${gitHash} DESCRIPTION:\"${gitDescription}\" GIT_DATE:${gitDate}"
+##logstashTracking="PACKET_DELAY:${PACKET_DELAY} GIT_HEAD:${GIT_HEAD} GIT_HASH:${gitHash} DESCRIPTION:\"${gitDescription}\" GIT_DATE:${gitDate}"
 logstashTracking="PACKET_DELAY:${PACKET_DELAY} GIT_HASH:${gitHash} DESCRIPTION:\"${gitDescription}\" GIT_DATE:${gitDate}"
-echo "### logstashTracking: ${logstashTracking}"
-
 if [ "$prNumber" != "" ]; then
   logstashTracking="${logstashTracking} PR:${prNumber}"
 fi
-
-#cd ../benchmark
-#echo "### Running benchmark, throttle is ${throttle}, runcount is ${RUN_COUNT}"
-#./benchmark.sh -t "${throttle}" -g "${GREP}" -r ${RUN_COUNT} -a "${logstashTracking}" -x ${XPACK}
-#./benchmark.sh -t "${throttle}" -g "${GREP}" -r ${RUN_COUNT} -a "${logstashTracking}" -x ${XPACK} -k ~/development/projects/kibana
-/home/tre/kibana/src/dev/perf_test/benchmark/benchmark.sh -r 1 -x true -k /home/tre/kibana -a "${logstashTracking}"
+##cd ../benchmark
+##echo "### Running benchmark, throttle is ${throttle}, runcount is ${RUN_COUNT}"
+##./benchmark.sh -t "${throttle}" -g "${GREP}" -r ${RUN_COUNT} -a "${logstashTracking}" -x ${XPACK}
+##./benchmark.sh -t "${throttle}" -g "${GREP}" -r ${RUN_COUNT} -a "${logstashTracking}" -x ${XPACK} -k ~/development/projects/kibana
+echo "/home/tre/kibana/src/dev/perf_test/benchmark/benchmark.sh -r 1 -x true -k ${FULL_EXTERNAL_PATH} -a ${logstashTracking}"
