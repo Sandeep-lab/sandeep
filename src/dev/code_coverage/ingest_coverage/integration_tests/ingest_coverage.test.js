@@ -22,7 +22,7 @@ import { spawn } from 'child_process';
 import { resolve } from 'path';
 import { green, always } from '../utils';
 
-import { STATIC_SITE_URL_PROP_NAME, TOTALS_INDEX, COVERAGE_INDEX } from '../constants';
+import { STATIC_SITE_URL_PROP_NAME, TOTALS_INDEX } from '../constants';
 
 const ROOT_DIR = resolve(__dirname, '../../../../..');
 const MOCKS_DIR = resolve(__dirname, './mocks');
@@ -63,7 +63,7 @@ describe('Ingesting Coverage to Cluster', () => {
 
   describe('with NODE_ENV set to "integration_test"', () => {
     describe(`and debug || verbose turned on`, () => {
-      describe(`to the [${TOTALS_INDEX}] index`, () => {
+      describe(`to the TOTALS_INDEX`, () => {
         const mutableTotalsIndexLoggingChunks = [];
         beforeAll(done => {
           const ingestAndMutateAsync = ingestAndMutate(done);
@@ -73,7 +73,7 @@ describe('Ingesting Coverage to Cluster', () => {
           verboseIngestAndMutateAsyncWithPath(mutableTotalsIndexLoggingChunks);
         });
 
-        it(`should say it's Just Logging when sending to the totals index: [${TOTALS_INDEX}]`, () => {
+        it(`should say it's Just Logging when sending to the TOTALS_INDEX`, () => {
           const filtered = mutableTotalsIndexLoggingChunks.filter(x =>
             x.includes('debg ### Just Logging')
           );
@@ -100,7 +100,7 @@ describe('Ingesting Coverage to Cluster', () => {
             .forEach(expectAllRegexesToPass(totalsIndexRegexes));
         });
       });
-      describe(`to the [${COVERAGE_INDEX}] index`, () => {
+      describe(`to the COVERAGE_INDEX index`, () => {
         const mutableCoverageIndexChunks = [];
 
         beforeAll(done => {

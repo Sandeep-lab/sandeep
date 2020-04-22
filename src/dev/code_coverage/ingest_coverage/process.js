@@ -47,12 +47,12 @@ const preamble = pipe(statsAndstaticSiteUrl, rootDirAndOrigPath, buildId, addPre
 const addTestRunnerAndStaticSiteUrl = pipe(testRunner, staticSite(staticSiteUrlBase));
 
 const transform = jsonSummaryPath => log => vcsInfo => {
-  const objStream = jsonStream(jsonSummaryPath).on('done', noop);
+  const obj$ = jsonStream(jsonSummaryPath).on('done', noop);
   const itemizeVcsInfo = itemizeVcs(vcsInfo);
 
-  const jsonSummary$ = _ => objStream.on('node', '!.*', _);
+  const jsonSummaryEvent$ = _ => obj$.on('node', '!.*', _);
 
-  fromEventPattern(jsonSummary$)
+  fromEventPattern(jsonSummaryEvent$)
     .pipe(
       map(preamble),
       map(coveredFilePath),
