@@ -39,14 +39,16 @@ function parseConfig(log: ToolingLog) {
   let config: unknown;
   try {
     config = JSON.parse(configJson);
-  } catch (error) {
-    log.warning('KIBANA_CI_STATS_CONFIG is invalid, stats will not be reported');
-    return;
+  } catch (_) {
+    // handled below
   }
 
   if (typeof config === 'object' && config !== null) {
     return validateConfig(log, config as { [k in keyof Config]: unknown });
   }
+
+  log.warning('KIBANA_CI_STATS_CONFIG is invalid, stats will not be reported');
+  return;
 }
 
 function validateConfig(log: ToolingLog, config: { [k in keyof Config]: unknown }) {
