@@ -30,6 +30,7 @@ export const BuildKibanaPlatformPluginsTask = {
       watch: false,
       dist: true,
       includeCoreBundle: true,
+      reportStatsName: build.isOss() ? 'oss distributable' : 'default distributable',
     });
 
     await runOptimizer(optimizerConfig)
