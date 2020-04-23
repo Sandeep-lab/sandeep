@@ -38,7 +38,7 @@ export const BuildKibanaPlatformPluginsTask = {
       includeCoreBundle: true,
     });
 
-    const reporter = CiStatsReporter.fromEnv();
+    const reporter = CiStatsReporter.fromEnv(log);
     const reportStatsName = build.isOss() ? 'oss distributable' : 'default distributable';
 
     await runOptimizer(optimizerConfig)
