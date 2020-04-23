@@ -43888,7 +43888,7 @@ const axios_1 = tslib_1.__importDefault(__webpack_require__(453));
 function parseConfig(log) {
     const configJson = process.env.KIBANA_CI_STATS_CONFIG;
     if (!configJson) {
-        log.debug('KIBANA_CI_STATS_CONFIG   environment variable not found, disabling CiStatsReporter');
+        log.debug('KIBANA_CI_STATS_CONFIG environment variable not found, disabling CiStatsReporter');
         return;
     }
     let config;
