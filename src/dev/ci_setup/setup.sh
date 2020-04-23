@@ -34,11 +34,11 @@ if [ "$GIT_CHANGES" ]; then
   exit 1
 fi
 
-# ###
-# ### rebuild kbn-pm distributable to ensure it's not out of date
-# ###
-# echo " -- building kbn-pm distributable"
-# yarn kbn run build -i @kbn/pm
+###
+### rebuild kbn-pm distributable to ensure it's not out of date
+###
+echo " -- building kbn-pm distributable"
+yarn kbn run build -i @kbn/pm
 
 ###
 ### verify no git modifications

@@ -43895,13 +43895,14 @@ function parseConfig(log) {
     try {
         config = JSON.parse(configJson);
     }
-    catch (error) {
-        log.warning('KIBANA_CI_STATS_CONFIG is invalid, stats will not be reported');
-        return;
+    catch (_) {
+        // handled below
     }
     if (typeof config === 'object' && config !== null) {
         return validateConfig(log, config);
     }
+    log.warning('KIBANA_CI_STATS_CONFIG is invalid, stats will not be reported');
+    return;
 }
 function validateConfig(log, config) {
     const validApiUrl = typeof config.apiUrl === 'string' && config.apiUrl.length !== 0;
