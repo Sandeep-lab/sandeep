@@ -3,8 +3,17 @@ def uploadCoverageStaticSite(timestamp) {
   def uploadPrefix = "gs://elastic-bekitzur-kibana-coverage-live/"
   def uploadPrefixWithTimeStamp = "${uploadPrefix}${timestamp}/"
 
+  uploadVcsInfo(uploadPrefix)
   uploadBaseWebsiteFiles(uploadPrefix)
   uploadCoverageHtmls(uploadPrefixWithTimeStamp)
+}
+
+def uploadVcsInfo(prefix) {
+  [
+    'VCS_INFO.txt'
+  ].each { x ->
+    uploadWithVault(prefix, x)
+  }
 }
 
 def uploadBaseWebsiteFiles(prefix) {
