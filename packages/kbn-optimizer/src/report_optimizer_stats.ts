@@ -21,16 +21,11 @@ import { materialize, mergeMap, dematerialize } from 'rxjs/operators';
 import { CiStatsReporter } from '@kbn/dev-utils';
 
 import { OptimizerUpdate$ } from './run_optimizer';
-import { OptimizerConfig, OptimizerState } from './optimizer';
+import { OptimizerState } from './optimizer';
 import { pipeClosure } from './common';
 
-export function reportOptimizerStats(reporter: CiStatsReporter, config: OptimizerConfig) {
+export function reportOptimizerStats(reporter: CiStatsReporter, name: string) {
   return pipeClosure((update$: OptimizerUpdate$) => {
-    const name = config.reportStatsName;
-    if (!name) {
-      return update$;
-    }
-
     let lastState: OptimizerState | undefined;
     return update$.pipe(
       materialize(),

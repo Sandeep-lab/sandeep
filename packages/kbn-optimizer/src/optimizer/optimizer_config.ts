@@ -63,8 +63,6 @@ interface Options {
 
   /** flag that causes the core bundle to be built along with plugins */
   includeCoreBundle?: boolean;
-  /** a name to use when reporting the stats for the builds created */
-  reportStatsName?: string;
 }
 
 interface ParsedOptions {
@@ -78,7 +76,6 @@ interface ParsedOptions {
   pluginScanDirs: string[];
   inspectWorkers: boolean;
   includeCoreBundle: boolean;
-  reportStatsName?: string;
 }
 
 export class OptimizerConfig {
@@ -132,11 +129,6 @@ export class OptimizerConfig {
       throw new TypeError('worker count must be a number');
     }
 
-    const reportStatsName = options.reportStatsName;
-    if (typeof reportStatsName !== 'string') {
-      throw new TypeError('reportStatsName must be a string');
-    }
-
     return {
       watch,
       dist,
@@ -148,7 +140,6 @@ export class OptimizerConfig {
       pluginPaths,
       inspectWorkers,
       includeCoreBundle,
-      reportStatsName,
     };
   }
 
@@ -180,8 +171,7 @@ export class OptimizerConfig {
       options.repoRoot,
       options.maxWorkerCount,
       options.dist,
-      options.profileWebpack,
-      options.reportStatsName
+      options.profileWebpack
     );
   }
 
@@ -194,8 +184,7 @@ export class OptimizerConfig {
     public readonly repoRoot: string,
     public readonly maxWorkerCount: number,
     public readonly dist: boolean,
-    public readonly profileWebpack: boolean,
-    public readonly reportStatsName: string | undefined
+    public readonly profileWebpack: boolean
   ) {}
 
   getWorkerConfig(optimizerCacheKey: unknown): WorkerConfig {

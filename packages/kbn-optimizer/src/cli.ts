@@ -99,17 +99,21 @@ run(
       extraPluginScanDirs,
       inspectWorkers,
       includeCoreBundle,
-      reportStatsName,
     });
 
-    const reporter = CiStatsReporter.fromEnv(log);
-    if (!reporter.isEnabled() && config.reportStatsName) {
-      throw createFailError('Unable to initialize CiStatsReporter from env');
+    let update$ = runOptimizer(config);
+
+    if (reportStatsName) {
+      const reporter = CiStatsReporter.fromEnv(log);
+
+      if (!reporter.isEnabled()) {
+        throw createFailError('Unable to initialize CiStatsReporter from env');
+      }
+
+      update$ = update$.pipe(reportOptimizerStats(reporter, reportStatsName));
     }
 
-    await runOptimizer(config)
-      .pipe(reportOptimizerStats(reporter, config), logOptimizerState(log, config))
-      .toPromise();
+    await update$.pipe(logOptimizerState(log, config)).toPromise();
   },
   {
     flags: {
