@@ -123,7 +123,8 @@ const truncateCommitMsg = x => {
 };
 
 export const itemizeVcs = vcsInfo => obj => {
-  const [previousSha, branch, sha, author, commitMsg] = vcsInfo;
+  // const [previousSha, branch, sha, author, commitMsg] = vcsInfo;
+  const [branch, sha, author, commitMsg] = vcsInfo;
   return {
     ...obj,
     vcs: {
@@ -132,7 +133,7 @@ export const itemizeVcs = vcsInfo => obj => {
       author,
       commitMsg: truncateCommitMsg(commitMsg),
       vcsCommitUrl: `https://github.com/elastic/kibana/commit/${sha}`,
-      vcsCompareUrl: `https://github.com/elastic/kibana/compare/${previousSha}...${sha}`,
+      // vcsCompareUrl: `https://github.com/elastic/kibana/compare/${previousSha}...${sha}`,
     },
   };
 };
