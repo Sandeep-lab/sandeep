@@ -32,7 +32,7 @@ interface Config {
 function parseConfig(log: ToolingLog) {
   const configJson = process.env.KIBANA_CI_STATS_CONFIG;
   if (!configJson) {
-    log.debug('KIBANA_CI_STATS_CONFIG   environment variable not found, disabling CiStatsReporter');
+    log.debug('KIBANA_CI_STATS_CONFIG environment variable not found, disabling CiStatsReporter');
     return;
   }
 
