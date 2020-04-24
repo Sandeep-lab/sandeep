@@ -2,7 +2,7 @@
 def uploadCoverageStaticData(timestamp) {
   def prefix = "gs://elastic-bekitzur-kibana-coverage-live/"
   def timeStamp = "${prefix}${timestamp}/"
-  def previous = "${uploadPrefix}previous_pointer/"
+  def previous = "${prefix}previous_pointer/"
 
   uploadListWithVault(previous, ['previous.txt'])
   uploadListWithVault(timeStamp, ['VCS_INFO.txt'])
