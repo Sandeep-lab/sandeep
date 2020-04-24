@@ -16,7 +16,7 @@ def uploadCoverageStaticData(timestamp) {
   def previous = "${prefix}previous_pointer/"
 
   uploadList(previous, ['previous.txt'])
-  uploadList(timeStamp, ['VCS_INFO.txt'])
+//  uploadList(timeStamp, ['VCS_INFO.txt'])
   uploadList(prefix, ['src/dev/code_coverage/www/index.html', 'src/dev/code_coverage/www/404.html'])
   uploadList(timeStamp, [
     'target/kibana-coverage/functional-combined',
@@ -101,13 +101,16 @@ def storePreviousSha(timestamp, title) {
 
     echo "### timestamp: ${timestamp}"
 
+    echo "### PREVIOUS Sha, from downloaded 'previous.txt': ..."
+    cat previous.txt
+
     currentSha() {
       git log --oneline | sed -n 1p | awk '{print \$1}'
     }
 
     echo \$(currentSha) > previous.txt
 
-    echo "### Current Sha, from 'previous.txt': ..."
+    echo "### CURRENT Sha, from 'previous.txt': ..."
     cat previous.txt
 
 
