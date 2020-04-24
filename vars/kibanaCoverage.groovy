@@ -71,7 +71,6 @@ def collectVcsInfo(title) {
 
     touch VCS_INFO.txt
 
-    git log --oneline | sed -n 2p | awk '{print $1}' > VCS_INFO.txt
 
     for X in "${!XS[@]}"; do
     {
