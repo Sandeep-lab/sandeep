@@ -132,7 +132,7 @@ export const itemizeVcs = vcsInfo => obj => {
       sha,
       author,
       commitMsg: truncateCommitMsg(commitMsg),
-      vcsCommitUrl: `https://github.com/elastic/kibana/commit/${sha}`,
+      // vcsCommitUrl: `https://github.com/elastic/kibana/commit/${sha}`,
       // vcsCompareUrl: `https://github.com/elastic/kibana/compare/${previousSha}...${sha}`,
     },
   };

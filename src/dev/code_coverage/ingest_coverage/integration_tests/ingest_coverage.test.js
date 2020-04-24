@@ -169,12 +169,12 @@ describe('Ingesting Coverage to Cluster', () => {
             expect(portion).to.contain(sha);
             expect(portion).to.contain(`"f07b34f6206"`);
           });
-          it(`should have a url to the sha`, () => {
-            const vcsUrl = `"vcsCommitUrl":`;
-            const portion = filteredWith(vcsUrl);
-            expect(portion).to.contain(vcsUrl);
-            expect(portion).to.contain(`"https://github.com/elastic/kibana/commit/f07b34f6206"`);
-          });
+          // it(`should have a url to the sha`, () => {
+          //   const vcsUrl = `"vcsCommitUrl":`;
+          //   const portion = filteredWith(vcsUrl);
+          //   expect(portion).to.contain(vcsUrl);
+          //   expect(portion).to.contain(`"https://github.com/elastic/kibana/commit/f07b34f6206"`);
+          // });
           it(`should have an author`, () => {
             const author = `"author":`;
             const portion = filteredWith(author);
