@@ -4,19 +4,24 @@ def uploadCoverageStaticData(timestamp) {
   def timeStamp = "${prefix}${timestamp}/"
   def previous = "${prefix}previous_pointer/"
 
-  uploadListWithVault(previous, ['previous.txt'])
-  uploadListWithVault(timeStamp, ['VCS_INFO.txt'])
-  uploadListWithVault(prefix, ['src/dev/code_coverage/www/index.html', 'src/dev/code_coverage/www/404.html'])
-  uploadListWithVault(timeStamp, [
+  uploadList(previous, ['previous.txt'])
+  uploadList(timeStamp, ['VCS_INFO.txt'])
+  uploadList(prefix, ['src/dev/code_coverage/www/index.html', 'src/dev/code_coverage/www/404.html'])
+  uploadList(timeStamp, [
     'target/kibana-coverage/functional-combined',
     'target/kibana-coverage/jest-combined',
     'target/kibana-coverage/mocha-combined'
   ])
 }
 
-def uploadWithVault(prefix, x) {
+
+def download(prefix, x) {
   def vaultSecret = 'secret/gce/elastic-bekitzur/service-account/kibana'
 
+  downloadWithVault(vaultSecret, prefix, x)
+}
+
+def downloadWithVault(vaultSecret, prefix, x) {
   withGcpServiceAccount.fromVaultSecret(vaultSecret, 'value') {
     sh """
         gsutil -m cp -r -a public-read -z js,css,html,txt ${x} '${prefix}'
@@ -24,9 +29,22 @@ def uploadWithVault(prefix, x) {
   }
 }
 
-def uploadListWithVault(prefix, xs) {
+def uploadWithVault(vaultSecret, prefix, x) {
+  withGcpServiceAccount.fromVaultSecret(vaultSecret, 'value') {
+    sh """
+        gsutil -m cp -r -a public-read -z js,css,html,txt ${x} '${prefix}'
+      """
+  }
+}
+def upload(prefix, x) {
+  def vaultSecret = 'secret/gce/elastic-bekitzur/service-account/kibana'
+
+  uploadWithVault(vaultSecret, prefix, x)
+}
+
+def uploadList(prefix, xs) {
   xs.each { x ->
-    uploadWithVault(prefix, x)
+    upload(prefix, x)
   }
 }
 
