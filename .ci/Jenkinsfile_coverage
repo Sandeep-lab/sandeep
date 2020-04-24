@@ -29,13 +29,19 @@ kibanaPipeline(timeoutMinutes: 240) {
         ),
       ])
       workers.base(name: 'coverage-worker', size: 'l', ramDisk: false, bootstrapped: false) {
+
         kibanaPipeline.downloadCoverageArtifacts()
+
+        kibanaCoverage.downloadList(kibanaCoverage.previousPrefix(), ['previous.txt'])
+
         def timestamp = new Date(currentBuild.startTimeInMillis).format("yyyy-MM-dd'T'HH:mm:ss'Z'", TimeZone.getTimeZone("UTC"))
         withEnv([
           "TIME_STAMP=${timestamp}",
         ]) {
+
           kibanaCoverage.collectVcsInfo("### Collect VCS Info")
-          kibanaCoverage.processPrevious(TIME_STAMP, "### Store Previous SHA")
+          kibanaCoverage.storePreviousSha(TIME_STAMP, "### Store Previous SHA")
+
           def vaultSecret = 'secret/kibana-issues/prod/coverage/elasticsearch'
           withVaultSecret(secret: vaultSecret, secret_field: 'host', variable_name: 'HOST_FROM_VAULT') {
             withVaultSecret(secret: vaultSecret, secret_field: 'username', variable_name: 'USER_FROM_VAULT') {
@@ -64,6 +70,7 @@ kibanaPipeline(timeoutMinutes: 240) {
               }
             }
           }
+          // previous.txt, VCS_INFO.txt, index and 404, & target/kibana-coverage/${TEST RUNNER TYPE}-combined/**/*.{js,css,html,txt}
           kibanaCoverage.uploadCoverageStaticData(TIME_STAMP)
         }
       }

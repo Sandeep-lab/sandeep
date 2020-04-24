@@ -1,6 +1,17 @@
+def liveSitePrefix() {
+  return "gs://elastic-bekitzur-kibana-coverage-live/"
+}
+
+def liveSiteVaultSecret() {
+  return "secret/gce/elastic-bekitzur/service-account/kibana"
+}
+
+def previousPrefix() {
+  return "${liveSitePrefix()}previous_pointer/"
+}
 
 def uploadCoverageStaticData(timestamp) {
-  def prefix = "gs://elastic-bekitzur-kibana-coverage-live/"
+  def prefix = liveSitePrefix()
   def timeStamp = "${prefix}${timestamp}/"
   def previous = "${prefix}previous_pointer/"
 
@@ -14,18 +25,21 @@ def uploadCoverageStaticData(timestamp) {
   ])
 }
 
-
-def download(prefix, x) {
-  def vaultSecret = 'secret/gce/elastic-bekitzur/service-account/kibana'
-
-  downloadWithVault(vaultSecret, prefix, x)
-}
-
 def downloadWithVault(vaultSecret, prefix, x) {
   withGcpServiceAccount.fromVaultSecret(vaultSecret, 'value') {
     sh """
-        gsutil -m cp -r -a public-read -z js,css,html,txt '${prefix}' ${x}
+        gsutil -m cp -r '${prefix}' '${x}'
       """
+  }
+}
+
+def download(prefix, x) {
+  downloadWithVault(liveSiteVaultSecret(), prefix, x)
+}
+
+def downloadList(prefix, xs) {
+  xs.each { x ->
+    download(prefix, x)
   }
 }
 
@@ -37,9 +51,7 @@ def uploadWithVault(vaultSecret, prefix, x) {
   }
 }
 def upload(prefix, x) {
-  def vaultSecret = 'secret/gce/elastic-bekitzur/service-account/kibana'
-
-  uploadWithVault(vaultSecret, prefix, x)
+  uploadWithVault(liveSiteVaultSecret(), prefix, x)
 }
 
 def uploadList(prefix, xs) {
@@ -83,21 +95,17 @@ def collectVcsInfo(title) {
   )
 }
 
-def processPrevious(timestamp, title) {
+def storePreviousSha(timestamp, title) {
   kibanaPipeline.bash(
     """
 
-    echo "### NOT FULLY IMPLEMENTED YET"
-    echo "### processPrevious timestamp: ${timestamp}"
+    echo "### timestamp: ${timestamp}"
 
     currentSha() {
       git log --oneline | sed -n 1p | awk '{print \$1}'
     }
 
-    echo "### Current Sha: ..."
-    currentSha
     echo \$(currentSha) > previous.txt
-
 
     echo "### Current Sha, from 'previous.txt': ..."
     cat previous.txt
@@ -107,3 +115,5 @@ def processPrevious(timestamp, title) {
     """, title
   )
 }
+
+return this
