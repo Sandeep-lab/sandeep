@@ -52,6 +52,12 @@ def uploadCoverageStaticData(timestamp) {
 def downloadWithVault(vaultSecret, prefix, x) {
   withGcpServiceAccount.fromVaultSecret(vaultSecret, 'value') {
     sh """
+        echo "### List Dir"
+        ls -la .
+        echo "### download prefix:"
+        echo '${prefix}'
+        echo "### download x:"
+        echo '${x}'
         gsutil -m cp -r '${prefix}' '${x}'
       """
   }
