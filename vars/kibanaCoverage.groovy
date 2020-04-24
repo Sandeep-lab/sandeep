@@ -133,7 +133,7 @@ def storePreviousSha(timestamp, title) {
     echo "### timestamp: ${timestamp}"
 
     echo "### PREVIOUS Sha, from downloaded 'previous.txt': ..."
-    cat previous.txt
+    cat previous.txt || true
 
     currentSha() {
       git log --oneline | sed -n 1p | awk '{print \$1}'
@@ -142,7 +142,7 @@ def storePreviousSha(timestamp, title) {
     echo \$(currentSha) > previous.txt
 
     echo "### CURRENT Sha, from 'previous.txt': ..."
-    cat previous.txt
+    cat previous.txt || true
 
 
 
