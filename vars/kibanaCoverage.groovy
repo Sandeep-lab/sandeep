@@ -1,3 +1,27 @@
+def bootMergeAndIngest(buildNum, buildUrl) {
+  kibanaPipeline.bash("""
+    source src/dev/ci_setup/setup_env.sh
+
+    # bootstrap from x-pack folder
+    cd x-pack
+    yarn kbn bootstrap --prefer-offline
+
+    # Return to project root
+    cd ..
+
+    . src/dev/code_coverage/shell_scripts/extract_archives.sh
+
+    . src/dev/code_coverage/shell_scripts/fix_html_reports_parallel.sh
+
+    . src/dev/code_coverage/shell_scripts/merge_jest_and_functional.sh
+
+    . src/dev/code_coverage/shell_scripts/copy_mocha_reports.sh
+
+    . src/dev/code_coverage/shell_scripts/ingest_coverage.sh ${buildNum} ${buildUrl}
+
+  """, "### Bootstrap shell and kibana env, merge and ingest code coverage")
+}
+
 def liveSitePrefix() {
   return "gs://elastic-bekitzur-kibana-coverage-live/"
 }
@@ -50,6 +74,7 @@ def uploadWithVault(vaultSecret, prefix, x) {
       """
   }
 }
+
 def upload(prefix, x) {
   uploadWithVault(liveSiteVaultSecret(), prefix, x)
 }
