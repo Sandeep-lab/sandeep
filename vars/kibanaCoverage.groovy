@@ -24,7 +24,7 @@ def download(prefix, x) {
 def downloadWithVault(vaultSecret, prefix, x) {
   withGcpServiceAccount.fromVaultSecret(vaultSecret, 'value') {
     sh """
-        gsutil -m cp -r -a public-read -z js,css,html,txt ${x} '${prefix}'
+        gsutil -m cp -r -a public-read -z js,css,html,txt '${prefix}' ${x}
       """
   }
 }
