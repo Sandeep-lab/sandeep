@@ -46,6 +46,8 @@ kibanaPipeline(timeoutMinutes: 240) {
           withVaultSecret(secret: vaultSecret, secret_field: 'host', variable_name: 'HOST_FROM_VAULT') {
             withVaultSecret(secret: vaultSecret, secret_field: 'username', variable_name: 'USER_FROM_VAULT') {
               withVaultSecret(secret: vaultSecret, secret_field: 'password', variable_name: 'PASS_FROM_VAULT') {
+                println "### BUILD_NUMBER: ${BUILD_NUMBER}"
+                println "### BUILD_URL: ${BUILD_URL}"
                 kibanaCoverage.bootMergeAndIngest(BUILD_NUMBER, BUILD_URL)
               }
             }
