@@ -34,15 +34,14 @@ def previousPrefix() {
   return "${liveSitePrefix()}previous_pointer/"
 }
 
-def uploadCoverageStaticData(timestamp) {
+def uploadCoverageStaticData(timestamp, previousFilePath) {
   def prefix = liveSitePrefix()
-  def timeStamp = "${prefix}${timestamp}/"
-  def previous = "${prefix}previous_pointer/"
 
-  uploadList(previous, ['previous.txt'])
-//  uploadList(timeStamp, ['VCS_INFO.txt'])
+  uploadPrevious(previousFilePath, "${prefix}previous_pointer/previous.txt")
+
   uploadList(prefix, ['src/dev/code_coverage/www/index.html', 'src/dev/code_coverage/www/404.html'])
-  uploadList(timeStamp, [
+
+  uploadList("${prefix}${timestamp}/", [
     'target/kibana-coverage/functional-combined',
     'target/kibana-coverage/jest-combined',
     'target/kibana-coverage/mocha-combined'
@@ -78,6 +77,23 @@ def uploadWithVault(vaultSecret, prefix, x) {
     sh """
         gsutil -m cp -r -a public-read -z js,css,html,txt ${x} '${prefix}'
       """
+  }
+}
+
+def uploadPrevious(src, dest) {
+  withGcpServiceAccount.fromVaultSecret(liveSiteVaultSecret(), 'value') {
+
+//    TODO: Quick hack to try to delete some stuff, undo!
+    sh """
+        gsutil rm -r "${liveSitePrefix()}previous_pointer/previous.txt/"
+        gsutil rm -r "${liveSitePrefix()}jobs/"
+        gsutil rm "${liveSitePrefix()}index.html"
+      """
+
+    sh """
+        gsutil -m cp -r -a public-read -z js,css,html,txt '${src}' '${dest}'
+      """
+
   }
 }
 

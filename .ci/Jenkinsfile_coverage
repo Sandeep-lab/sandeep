@@ -53,7 +53,7 @@ kibanaPipeline(timeoutMinutes: 240) {
             }
           }
           // previous.txt, VCS_INFO.txt, index and 404, & target/kibana-coverage/${TEST RUNNER TYPE}-combined/**/*.{js,css,html,txt}
-          kibanaCoverage.uploadCoverageStaticData(TIME_STAMP)
+          kibanaCoverage.uploadCoverageStaticData(TIME_STAMP, 'previous.txt')
         }
       }
     }
