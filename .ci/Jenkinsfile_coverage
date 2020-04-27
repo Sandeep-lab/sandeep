@@ -32,7 +32,7 @@ kibanaPipeline(timeoutMinutes: 240) {
 
         kibanaPipeline.downloadCoverageArtifacts()
 
-        kibanaCoverage.downloadList(kibanaCoverage.previousPrefix(), ['previous.txt'])
+        kibanaCoverage.downloadPrevious()
 
         def timestamp = new Date(currentBuild.startTimeInMillis).format("yyyy-MM-dd'T'HH:mm:ss'Z'", TimeZone.getTimeZone("UTC"))
         withEnv([
@@ -52,8 +52,11 @@ kibanaPipeline(timeoutMinutes: 240) {
               }
             }
           }
-          // previous.txt, VCS_INFO.txt, index and 404, & target/kibana-coverage/${TEST RUNNER TYPE}-combined/**/*.{js,css,html,txt}
-          kibanaCoverage.uploadCoverageStaticData(TIME_STAMP, 'previous.txt')
+          sh "ls -la ."
+          sh "ls -la ./previous_pointer"
+          sh "cat ./previous_pointer/previous.txt"
+          // previous.txt, index and 404, & target/kibana-coverage/${TEST RUNNER TYPE}-combined/**/*.{js,css,html,txt}
+          kibanaCoverage.uploadCoverageStaticData(TIME_STAMP)
         }
       }
     }

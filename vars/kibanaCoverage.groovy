@@ -22,22 +22,18 @@ def bootMergeAndIngest(buildNum, buildUrl) {
   """, "### Bootstrap shell and kibana env, merge and ingest code coverage")
 }
 
-def liveSitePrefix() {
+def gcpSite() {
   return "gs://elastic-bekitzur-kibana-coverage-live/"
 }
 
-def liveSiteVaultSecret() {
+def vaultPath() {
   return "secret/gce/elastic-bekitzur/service-account/kibana"
 }
 
-def previousPrefix() {
-  return "${liveSitePrefix()}previous_pointer/"
-}
+def uploadCoverageStaticData(timestamp) {
+  def prefix = gcpSite()
 
-def uploadCoverageStaticData(timestamp, previousFilePath) {
-  def prefix = liveSitePrefix()
-
-  uploadPrevious(previousFilePath, "${prefix}previous_pointer/previous.txt")
+  uploadPrevious("previous.txt", "${prefix}previous_pointer/previous.txt")
 
   uploadList(prefix, ['src/dev/code_coverage/www/index.html', 'src/dev/code_coverage/www/404.html'])
 
@@ -48,27 +44,12 @@ def uploadCoverageStaticData(timestamp, previousFilePath) {
   ])
 }
 
-def downloadWithVault(vaultSecret, prefix, x) {
-  withGcpServiceAccount.fromVaultSecret(vaultSecret, 'value') {
-    sh """
-        echo "### List Dir"
-        ls -la .
-        echo "### download prefix:"
-        echo '${prefix}'
-        echo "### download x:"
-        echo '${x}'
-        gsutil -m cp -r '${prefix}' '${x}'
-      """
-  }
-}
+def downloadPrevious() {
+  def previousPath = '/previous_pointer'
+  def storageLocation = "${gcpSite()}${previousPath}"
 
-def download(prefix, x) {
-  downloadWithVault(liveSiteVaultSecret(), prefix, x)
-}
-
-def downloadList(prefix, xs) {
-  xs.each { x ->
-    download(prefix, x)
+  withGcpServiceAccount.fromVaultSecret(vaultPath(), 'value') {
+    sh "mkdir -p '${previousPath}' && gsutil -m cp -r '${storageLocation}.txt' '${previousPath}'"
   }
 }
 
@@ -81,13 +62,14 @@ def uploadWithVault(vaultSecret, prefix, x) {
 }
 
 def uploadPrevious(src, dest) {
-  withGcpServiceAccount.fromVaultSecret(liveSiteVaultSecret(), 'value') {
+  withGcpServiceAccount.fromVaultSecret(vaultPath(), 'value') {
 
 //    TODO: Quick hack to try to delete some stuff, undo!
     sh """
-        gsutil rm -r "${liveSitePrefix()}previous_pointer/previous.txt/"
-        gsutil rm -r "${liveSitePrefix()}jobs/"
-        gsutil rm "${liveSitePrefix()}index.html"
+        echo "### Trying to clear out gcp a little"
+        gsutil rm -r "${gcpSite()}previous_pointer/previous.txt/" || echo "### Failed cleanup"
+        gsutil rm -r "${gcpSite()}jobs/" || echo "### Failed cleanup"
+        gsutil rm "${gcpSite()}index.html" || echo "### Failed cleanup"
       """
 
     sh """
@@ -97,13 +79,9 @@ def uploadPrevious(src, dest) {
   }
 }
 
-def upload(prefix, x) {
-  uploadWithVault(liveSiteVaultSecret(), prefix, x)
-}
-
 def uploadList(prefix, xs) {
   xs.each { x ->
-    upload(prefix, x)
+    uploadWithVault(vaultPath(), prefix, x)
   }
 }
 
