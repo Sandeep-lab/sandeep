@@ -45,11 +45,11 @@ def uploadCoverageStaticData(timestamp) {
 }
 
 def downloadPrevious() {
-  def previousPath = '/previous_pointer'
+  def previousPath = 'previous_pointer'
   def storageLocation = "${gcpSite()}${previousPath}"
 
   withGcpServiceAccount.fromVaultSecret(vaultPath(), 'value') {
-    sh "mkdir -p '.${previousPath}' && gsutil -m cp -r '${storageLocation}.txt' '.${previousPath}'"
+    sh "mkdir -p './${previousPath}' && gsutil -m cp -r '${storageLocation}.txt' './${previousPath}'"
   }
 }
 
