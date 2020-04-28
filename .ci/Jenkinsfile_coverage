@@ -9,30 +9,39 @@ kibanaPipeline(timeoutMinutes: 240) {
       'CODE_COVERAGE=1', // Enables coverage.  Needed for multiple ci scripts, such as remote.ts, test/scripts/*.sh, schema.js, etc.
     ]) {
       parallel([
-        'kibana-intake-agent': workers.intake('kibana-intake', './test/scripts/jenkins_unit.sh'),
-//        'x-pack-intake-agent': {
-//          withEnv([
-//            'NODE_ENV=test' // Needed for jest tests only
-//          ]) {
-//            workers.intake('x-pack-intake', './test/scripts/jenkins_xpack.sh')()
-//          }
-//        },
-        'kibana-oss-agent'   : workers.functional(
+        // 'kibana-intake-agent': workers.intake('kibana-intake', './test/scripts/jenkins_unit.sh'),
+        // 'x-pack-intake-agent': {
+        // withEnv([
+        // 'NODE_ENV=test' // Needed for jest tests only
+        // ]) {
+        // workers.intake('x-pack-intake', './test/scripts/jenkins_xpack.sh')()
+        // }
+        // },
+        'kibana-oss-agent'  : workers.functional(
           'kibana-oss-tests',
           { kibanaPipeline.buildOss() },
           ossProks()
         ),
-        'kibana-xpack-agent' : workers.functional(
+        'kibana-xpack-agent': workers.functional(
           'kibana-xpack-tests',
           { kibanaPipeline.buildXpack() },
           xpackProks()
         ),
       ])
       workers.base(name: 'coverage-worker', size: 'l', ramDisk: false, bootstrapped: false) {
+        kibanaCoverage.deleteStuff()
 
         kibanaPipeline.downloadCoverageArtifacts()
 
         kibanaCoverage.downloadPrevious()
+        def logPrevious = """
+
+            ls -la ./previous_pointer
+            cat ./previous_pointer/previous.txt
+
+           """
+        extraLogging(logPrevious)
+
 
         def timestamp = new Date(currentBuild.startTimeInMillis).format("yyyy-MM-dd'T'HH:mm:ss'Z'", TimeZone.getTimeZone("UTC"))
         withEnv([
@@ -40,6 +49,7 @@ kibanaPipeline(timeoutMinutes: 240) {
         ]) {
 
           kibanaCoverage.collectVcsInfo("### Collect VCS Info")
+
           kibanaCoverage.storePreviousSha(TIME_STAMP, "### Store Previous SHA")
 
           def vaultSecret = 'secret/kibana-issues/prod/coverage/elasticsearch'
@@ -52,9 +62,7 @@ kibanaPipeline(timeoutMinutes: 240) {
               }
             }
           }
-          sh "ls -la ."
-          sh "ls -la ./previous_pointer"
-          sh "cat ./previous_pointer/previous.txt"
+          extraLogging(logPrevious)
           // previous.txt, index and 404, & target/kibana-coverage/${TEST RUNNER TYPE}-combined/**/*.{js,css,html,txt}
           kibanaCoverage.uploadCoverageStaticData(TIME_STAMP)
         }
@@ -64,10 +72,14 @@ kibanaPipeline(timeoutMinutes: 240) {
   }
 }
 
+def extraLogging(script) {
+  kibanaPipeline.bash(script, "### Extra Logging")
+}
+
 def ossProks() {
   return [
 //    'oss-ciGroup1' : kibanaPipeline.ossCiGroupProcess(1),
-    'oss-ciGroup2' : kibanaPipeline.ossCiGroupProcess(2),
+'oss-ciGroup2': kibanaPipeline.ossCiGroupProcess(2),
 //    'oss-ciGroup3' : kibanaPipeline.ossCiGroupProcess(3),
 //    'oss-ciGroup4' : kibanaPipeline.ossCiGroupProcess(4),
 //    'oss-ciGroup5' : kibanaPipeline.ossCiGroupProcess(5),
@@ -80,10 +92,11 @@ def ossProks() {
 //    'oss-ciGroup12': kibanaPipeline.ossCiGroupProcess(12),
   ]
 }
+
 def xpackProks() {
   return [
 //    'xpack-ciGroup1' : kibanaPipeline.xpackCiGroupProcess(1),
-    'xpack-ciGroup2' : kibanaPipeline.xpackCiGroupProcess(2),
+'xpack-ciGroup2': kibanaPipeline.xpackCiGroupProcess(2),
 //    'xpack-ciGroup3' : kibanaPipeline.xpackCiGroupProcess(3),
 //    'xpack-ciGroup4' : kibanaPipeline.xpackCiGroupProcess(4),
 //    'xpack-ciGroup5' : kibanaPipeline.xpackCiGroupProcess(5),
