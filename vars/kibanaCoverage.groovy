@@ -75,9 +75,9 @@ def deleteStuff() {
   //    TODO: Quick hack to try to delete some stuff, undo!
   sh """
         echo "### Trying to clear out gcp a little"
-        gsutil rm -r "${gcpSite()}previous_pointer/previous.txt/" || echo "### Failed cleanup"
-        gsutil rm -r "${gcpSite()}jobs/" || echo "### Failed cleanup"
-        gsutil rm "${gcpSite()}index.html" || echo "### Failed cleanup"
+        gsutil rm -r \"${gcpSite()}previous_pointer/previous.txt/\" || echo \"### Failed cleanup\"
+        gsutil rm -r \"${gcpSite()}jobs/\" || echo \"### Failed cleanup\"
+        gsutil rm \"${gcpSite()}index.html\" || echo \"### Failed cleanup\"
       """
 }
 
