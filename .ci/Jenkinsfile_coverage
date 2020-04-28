@@ -37,7 +37,7 @@ kibanaPipeline(timeoutMinutes: 240) {
         def logPrevious = """
 
             ls -la ./previous_pointer
-            cat ./previous_pointer/previous.txt
+            cat previous.txt || echo "✖✖✖ previous.txt not found!"
 
            """
         extraLogging(logPrevious)

@@ -138,7 +138,7 @@ def storePreviousSha(timestamp, title) {
     echo \$(currentSha) > previous.txt
 
     echo "### CURRENT Sha, from 'previous.txt': ..."
-    cat previous.txt || true
+    cat previous.txt || echo "✖✖✖ previous.txt not found!"
 
 
 
