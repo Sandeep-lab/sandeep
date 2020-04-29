@@ -44,32 +44,11 @@ def uploadCoverageStaticData(timestamp) {
   ])
 }
 
-def downloadPrevious() {
-  withGcpServiceAccount.fromVaultSecret(vaultPath(), 'value') {
-    kibanaPipeline.bash("""
-    set -x
-    gsutil -m cp -r gs://elastic-bekitzur-kibana-coverage-live/previous_pointer/previous.txt .
-    cat ./previous.txt
-    set + x
-    """, "### Download Previous")
-  }
-}
-
 def uploadWithVault(vaultSecret, prefix, x) {
   withGcpServiceAccount.fromVaultSecret(vaultSecret, 'value') {
     sh """
         gsutil -m cp -r -a public-read -z js,css,html,txt ${x} '${prefix}'
       """
-  }
-}
-
-def uploadPrevious(src, dest) {
-  withGcpServiceAccount.fromVaultSecret(vaultPath(), 'value') {
-
-    sh """
-        gsutil cp -r -a public-read -z js,css,html,txt '${src}' '${dest}'
-      """
-
   }
 }
 
@@ -90,8 +69,9 @@ def uploadList(prefix, xs) {
 }
 
 def collectVcsInfo(title) {
-  kibanaPipeline.bash(
-    '''
+  kibanaPipeline.bash('''
+
+    set -x
 
     predicate() {
       x=$1
@@ -112,7 +92,6 @@ def collectVcsInfo(title) {
 
     touch VCS_INFO.txt
 
-
     for X in "${!XS[@]}"; do
     {
       predicate "${XS[X]}"
@@ -120,31 +99,47 @@ def collectVcsInfo(title) {
     }
     done
 
+    collectPrevious() {
+      echo "$(git log --pretty=format:%h -1)" > previous.txt
+    }
+    collectPrevious
+
+    set +x
+
     ''', title
   )
 }
 
-def storePreviousSha(timestamp, title) {
-  kibanaPipeline.bash(
-    """
-    echo "### timestamp: ${timestamp}"
+def downloadPrevious(title) {
+  withGcpServiceAccount.fromVaultSecret(vaultPath(), 'value') {
+    kibanaPipeline.bash('''
 
     set -x
 
-    currentSha() {
-      git log --oneline | sed -n 1p | awk '{print \$1}'
-    }
+    gsutil -m cp -r gs://elastic-bekitzur-kibana-coverage-live/previous_pointer/previous.txt .
+    mv previous.txt downloaded_previous.txt
+    cat downloaded_previous.txt
 
-    echo \$(currentSha) > previous.txt
+    set +x
 
-    echo "### CURRENT Sha, from 'previous.txt': ..."
-
-    cat previous.txt || echo "✖✖✖ previous.txt not found!"
-
-    set + x
-
-    """, title
-  )
+    ''', title)
+  }
 }
+
+def uploadPrevious(title) {
+  withGcpServiceAccount.fromVaultSecret(vaultPath(), 'value') {
+    kibanaPipeline.bash('''
+
+    set -x
+
+    gsutil cp previous.txt s://elastic-bekitzur-kibana-coverage-live/previous_pointer/
+
+    set +x
+
+    ''', title)
+
+  }
+}
+
 
 return this
