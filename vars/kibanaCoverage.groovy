@@ -1,5 +1,21 @@
 def bootMergeAndIngest(buildNum, buildUrl) {
+  def vaultSecret = 'secret/kibana-issues/prod/coverage/elasticsearch'
+  withVaultSecret(secret: vaultSecret, secret_field: 'host', variable_name: 'HOST_FROM_VAULT') {
+    withVaultSecret(secret: vaultSecret, secret_field: 'username', variable_name: 'USER_FROM_VAULT') {
+      withVaultSecret(secret: vaultSecret, secret_field: 'password', variable_name: 'PASS_FROM_VAULT') {
+        println "### buildNum: $buildNum"
+        println "### buildUrl: $buildUrl"
+        kibanaCoverage.ingest(BUILD_NUMBER, BUILD_URL)
+      }
+    }
+  }
+
+}
+
+def ingest(buildNum, buildUrl) {
+  def title = '### Merge and Ingest Code Coverage'
   kibanaPipeline.bash("""
+
     source src/dev/ci_setup/setup_env.sh
 
     # bootstrap from x-pack folder
@@ -19,7 +35,7 @@ def bootMergeAndIngest(buildNum, buildUrl) {
 
     . src/dev/code_coverage/shell_scripts/ingest_coverage.sh ${buildNum} ${buildUrl}
 
-  """, "### Bootstrap shell and kibana env, merge and ingest code coverage")
+  """, title)
 }
 
 def gcpSite() {

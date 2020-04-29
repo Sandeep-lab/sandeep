@@ -29,39 +29,15 @@ kibanaPipeline(timeoutMinutes: 240) {
 //        ),
 //      ])
       workers.base(name: 'coverage-worker', size: 'l', ramDisk: false, bootstrapped: false) {
-
 //        kibanaPipeline.downloadCoverageArtifacts()
-
         kibanaCoverage.downloadPrevious('### Download Previous')
-//        def logPrevious = """
-//
-//            ls -la ./previous_pointer
-//            cat previous.txt || echo "✖✖✖ previous.txt not found!"
-//
-//           """
-//        extraLogging(logPrevious)
-
-
         def timestamp = new Date(currentBuild.startTimeInMillis).format("yyyy-MM-dd'T'HH:mm:ss'Z'", TimeZone.getTimeZone("UTC"))
         withEnv([
           "TIME_STAMP=${timestamp}",
         ]) {
-
           kibanaCoverage.collectVcsInfo('### Collect VCS Info')
           kibanaCoverage.uploadPrevious('### Upload Previous')
-
-
-//          def vaultSecret = 'secret/kibana-issues/prod/coverage/elasticsearch'
-//          withVaultSecret(secret: vaultSecret, secret_field: 'host', variable_name: 'HOST_FROM_VAULT') {
-//            withVaultSecret(secret: vaultSecret, secret_field: 'username', variable_name: 'USER_FROM_VAULT') {
-//              withVaultSecret(secret: vaultSecret, secret_field: 'password', variable_name: 'PASS_FROM_VAULT') {
-//                println "### BUILD_NUMBER: ${BUILD_NUMBER}"
-//                println "### BUILD_URL: ${BUILD_URL}"
-//                kibanaCoverage.bootMergeAndIngest(BUILD_NUMBER, BUILD_URL)
-//              }
-//            }
-//          }
-//          extraLogging(logPrevious)
+//          kibanaCoverage.bootMergeAndIngest(BUILD_NUMBER, BUILD_URL)
           // previous.txt, index and 404, & target/kibana-coverage/${TEST RUNNER TYPE}-combined/**/*.{js,css,html,txt}
 //          kibanaCoverage.uploadCoverageStaticData(TIME_STAMP)
         }
@@ -69,10 +45,6 @@ kibanaPipeline(timeoutMinutes: 240) {
     }
     kibanaPipeline.sendMail()
   }
-}
-
-def extraLogging(script) {
-  kibanaPipeline.bash(script, "### Extra Logging")
 }
 
 def ossProks() {
