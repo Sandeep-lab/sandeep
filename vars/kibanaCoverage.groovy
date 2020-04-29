@@ -65,21 +65,21 @@ def uploadPrevious(src, dest) {
   withGcpServiceAccount.fromVaultSecret(vaultPath(), 'value') {
 
     sh """
-        gsutil -m cp -r -a public-read -z js,css,html,txt '${src}' '${dest}'
+        gsutil cp -r -a public-read -z js,css,html,txt '${src}' '${dest}'
       """
 
   }
 }
 
-def deleteStuff() {
-  //    TODO: Quick hack to try to delete some stuff, undo!
-  sh """
-        echo "### Trying to clear out gcp a little"
-        gsutil rm -r \"${gcpSite()}previous_pointer/previous.txt/\" || echo \"### Failed cleanup\"
-        gsutil rm -r \"${gcpSite()}jobs/\" || echo \"### Failed cleanup\"
-        gsutil rm \"${gcpSite()}index.html\" || echo \"### Failed cleanup\"
-      """
-}
+//def deleteStuff() {
+//  //    TODO: Quick hack to try to delete some stuff, undo!
+//  sh """
+//        echo "### Trying to clear out gcp a little"
+//        gsutil rm -r \"${gcpSite()}previous_pointer/previous.txt/\" || echo \"### Failed cleanup\"
+//        gsutil rm -r \"${gcpSite()}jobs/\" || echo \"### Failed cleanup\"
+//        gsutil rm \"${gcpSite()}index.html\" || echo \"### Failed cleanup\"
+//      """
+//}
 
 def uploadList(prefix, xs) {
   xs.each { x ->

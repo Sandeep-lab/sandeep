@@ -22,14 +22,14 @@ kibanaPipeline(timeoutMinutes: 240) {
           { kibanaPipeline.buildOss() },
           ossProks()
         ),
-        'kibana-xpack-agent': workers.functional(
-          'kibana-xpack-tests',
-          { kibanaPipeline.buildXpack() },
-          xpackProks()
-        ),
+//        'kibana-xpack-agent': workers.functional(
+//          'kibana-xpack-tests',
+//          { kibanaPipeline.buildXpack() },
+//          xpackProks()
+//        ),
       ])
       workers.base(name: 'coverage-worker', size: 'l', ramDisk: false, bootstrapped: false) {
-        kibanaCoverage.deleteStuff()
+//        kibanaCoverage.deleteStuff()
 
         kibanaPipeline.downloadCoverageArtifacts()
 
