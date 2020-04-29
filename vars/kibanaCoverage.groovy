@@ -45,11 +45,13 @@ def uploadCoverageStaticData(timestamp) {
 }
 
 def downloadPrevious() {
-  def previousPath = 'previous_pointer'
-  def storageLocation = "${gcpSite()}${previousPath}"
-
   withGcpServiceAccount.fromVaultSecret(vaultPath(), 'value') {
-    sh "mkdir -p './${previousPath}' && gsutil -m cp -r '${storageLocation}.txt' './${previousPath}'"
+    kibanaPipeline.bash("""
+    set -x
+    gsutil -m cp -r gs://elastic-bekitzur-kibana-coverage-live/previous_pointer/previous.txt .
+    cat ./previous.txt
+    set + x
+    """, "### Download Previous")
   }
 }
 
@@ -125,11 +127,9 @@ def collectVcsInfo(title) {
 def storePreviousSha(timestamp, title) {
   kibanaPipeline.bash(
     """
-
     echo "### timestamp: ${timestamp}"
 
-    echo "### PREVIOUS Sha, from downloaded 'previous.txt': ..."
-    cat previous.txt || true
+    set -x
 
     currentSha() {
       git log --oneline | sed -n 1p | awk '{print \$1}'
@@ -138,9 +138,10 @@ def storePreviousSha(timestamp, title) {
     echo \$(currentSha) > previous.txt
 
     echo "### CURRENT Sha, from 'previous.txt': ..."
+
     cat previous.txt || echo "✖✖✖ previous.txt not found!"
 
-
+    set + x
 
     """, title
   )
