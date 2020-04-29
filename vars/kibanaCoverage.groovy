@@ -5,7 +5,7 @@ def bootMergeAndIngest(buildNum, buildUrl) {
       withVaultSecret(secret: vaultSecret, secret_field: 'password', variable_name: 'PASS_FROM_VAULT') {
         println "### buildNum: $buildNum"
         println "### buildUrl: $buildUrl"
-        kibanaCoverage.ingest(BUILD_NUMBER, BUILD_URL)
+        ingest(BUILD_NUMBER, BUILD_URL)
       }
     }
   }
