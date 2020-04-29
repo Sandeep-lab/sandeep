@@ -132,7 +132,7 @@ def uploadPrevious(title) {
 
     set -x
 
-    gsutil cp previous.txt s://elastic-bekitzur-kibana-coverage-live/previous_pointer/
+    gsutil cp previous.txt gs://elastic-bekitzur-kibana-coverage-live/previous_pointer/
 
     set +x
 
