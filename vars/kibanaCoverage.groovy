@@ -143,7 +143,7 @@ def uploadPrevious(title) {
     }
     collectPrevious
 
-    gsutil cp previous.txt gs://elastic-bekitzur-kibana-coverage-live/previous_pointer
+    gsutil cp previous.txt gs://elastic-bekitzur-kibana-coverage-live/previous_pointer/
 
 
     ''', title)
