@@ -38,7 +38,7 @@ kibanaPipeline(timeoutMinutes: 240) {
 }
 
 def handleInjestion() {
-  kibanaPipeline.downloadCoverageArtifacts()
+//  kibanaPipeline.downloadCoverageArtifacts()
   kibanaCoverage.injestAndUpload('### Injest && Upload')
 }
 
