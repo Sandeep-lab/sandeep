@@ -107,19 +107,17 @@ def injestAndUpload(title) {
   withEnv([
     "TIME_STAMP=${timestamp}",
   ]) {
-    injest([BUILD_NUMBER, BUILD_URL, title])
+    injestWithVault(BUILD_NUMBER, BUILD_URL, title)
     uploadCoverageStaticData(TIME_STAMP, '### Upload previous & coverage static assets')
   }
 }
 
-//def injest(buildNum, buildUrl, title) {
-def injest(int[] args) {
+def injestWithVault(buildNum, buildUrl, title) {
   def vaultSecret = 'secret/kibana-issues/prod/coverage/elasticsearch'
   withVaultSecret(secret: vaultSecret, secret_field: 'host', variable_name: 'HOST_FROM_VAULT') {
     withVaultSecret(secret: vaultSecret, secret_field: 'username', variable_name: 'USER_FROM_VAULT') {
       withVaultSecret(secret: vaultSecret, secret_field: 'password', variable_name: 'PASS_FROM_VAULT') {
-//        bootMergeAndIngest(buildNum, buildUrl, title)
-        bootMergeAndIngest(*args)
+        bootMergeAndIngest(buildNum, buildUrl, title)
       }
     }
   }
