@@ -1,65 +1,9 @@
-//def injest(buildNum, buildUrl, title) {
-def injest(int[] args) {
-  def vaultSecret = 'secret/kibana-issues/prod/coverage/elasticsearch'
-  withVaultSecret(secret: vaultSecret, secret_field: 'host', variable_name: 'HOST_FROM_VAULT') {
-    withVaultSecret(secret: vaultSecret, secret_field: 'username', variable_name: 'USER_FROM_VAULT') {
-      withVaultSecret(secret: vaultSecret, secret_field: 'password', variable_name: 'PASS_FROM_VAULT') {
-//        bootMergeAndIngest(buildNum, buildUrl, title)
-        bootMergeAndIngest(*args)
-      }
-    }
-  }
-
-}
-
-def bootMergeAndIngest(buildNum, buildUrl, title) {
-  kibanaPipeline.bash("""
-
-    source src/dev/ci_setup/setup_env.sh
-
-    # bootstrap from x-pack folder
-    cd x-pack
-    yarn kbn bootstrap --prefer-offline
-
-    # Return to project root
-    cd ..
-
-    . src/dev/code_coverage/shell_scripts/extract_archives.sh
-
-    . src/dev/code_coverage/shell_scripts/fix_html_reports_parallel.sh
-
-    . src/dev/code_coverage/shell_scripts/merge_jest_and_functional.sh
-
-    . src/dev/code_coverage/shell_scripts/copy_mocha_reports.sh
-
-    . src/dev/code_coverage/shell_scripts/ingest_coverage.sh ${buildNum} ${buildUrl}
-
-  """, title)
-}
-
 def gcpSite() {
   return "gs://elastic-bekitzur-kibana-coverage-live/"
 }
 
 def vaultPath() {
   return "secret/gce/elastic-bekitzur/service-account/kibana"
-}
-
-def uploadCoverageStaticData(timestamp, title) {
-
-  kibanaPipeline.bash('''
-    echo "### QA Rocks!
-  ''', title)
-
-  def prefix = gcpSite()
-
-  uploadList(prefix, ['src/dev/code_coverage/www/index.html', 'src/dev/code_coverage/www/404.html'])
-
-  uploadList("${prefix}${timestamp}/", [
-    'target/kibana-coverage/functional-combined',
-    'target/kibana-coverage/jest-combined',
-    'target/kibana-coverage/mocha-combined'
-  ])
 }
 
 def uploadWithVault(vaultSecret, prefix, x) {
@@ -154,6 +98,73 @@ def uploadPrevious(title) {
     ''', title)
 
   }
+}
+
+def injestAndUpload(title) {
+  def timestamp = new Date(currentBuild.startTimeInMillis)
+    .format("yyyy-MM-dd'T'HH:mm:ss'Z'", TimeZone.getTimeZone("UTC"))
+
+  withEnv([
+    "TIME_STAMP=${timestamp}",
+  ]) {
+    injest([BUILD_NUMBER, BUILD_URL, title])
+    uploadCoverageStaticData(TIME_STAMP, '### Upload previous & coverage static assets')
+  }
+}
+
+//def injest(buildNum, buildUrl, title) {
+def injest(int[] args) {
+  def vaultSecret = 'secret/kibana-issues/prod/coverage/elasticsearch'
+  withVaultSecret(secret: vaultSecret, secret_field: 'host', variable_name: 'HOST_FROM_VAULT') {
+    withVaultSecret(secret: vaultSecret, secret_field: 'username', variable_name: 'USER_FROM_VAULT') {
+      withVaultSecret(secret: vaultSecret, secret_field: 'password', variable_name: 'PASS_FROM_VAULT') {
+//        bootMergeAndIngest(buildNum, buildUrl, title)
+        bootMergeAndIngest(*args)
+      }
+    }
+  }
+}
+
+def bootMergeAndIngest(buildNum, buildUrl, title) {
+  kibanaPipeline.bash("""
+
+    source src/dev/ci_setup/setup_env.sh
+
+    # bootstrap from x-pack folder
+    cd x-pack
+    yarn kbn bootstrap --prefer-offline
+
+    # Return to project root
+    cd ..
+
+    . src/dev/code_coverage/shell_scripts/extract_archives.sh
+
+    . src/dev/code_coverage/shell_scripts/fix_html_reports_parallel.sh
+
+    . src/dev/code_coverage/shell_scripts/merge_jest_and_functional.sh
+
+    . src/dev/code_coverage/shell_scripts/copy_mocha_reports.sh
+
+    . src/dev/code_coverage/shell_scripts/ingest_coverage.sh ${buildNum} ${buildUrl}
+
+  """, title)
+}
+
+def uploadCoverageStaticData(timestamp, title) {
+
+  kibanaPipeline.bash('''
+    echo "### QA Rocks!
+  ''', title)
+
+  def prefix = gcpSite()
+
+  uploadList(prefix, ['src/dev/code_coverage/www/index.html', 'src/dev/code_coverage/www/404.html'])
+
+  uploadList("${prefix}${timestamp}/", [
+    'target/kibana-coverage/functional-combined',
+    'target/kibana-coverage/jest-combined',
+    'target/kibana-coverage/mocha-combined'
+  ])
 }
 
 
