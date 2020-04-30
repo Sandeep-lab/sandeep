@@ -87,8 +87,6 @@ def uploadList(prefix, xs) {
 def collectVcsInfo(title) {
   kibanaPipeline.bash('''
 
-    set -x
-
     predicate() {
       x=$1
       if [ -n "$x" ]; then
@@ -115,13 +113,6 @@ def collectVcsInfo(title) {
     }
     done
 
-    collectPrevious() {
-      echo "$(git log --pretty=format:%h -1)" > previous.txt
-    }
-    collectPrevious
-
-    set +x
-
     ''', title
   )
 }
@@ -130,13 +121,12 @@ def downloadPrevious(title) {
   withGcpServiceAccount.fromVaultSecret(vaultPath(), 'value') {
     kibanaPipeline.bash('''
 
-    set -x
-
     gsutil -m cp -r gs://elastic-bekitzur-kibana-coverage-live/previous_pointer/previous.txt .
     mv previous.txt downloaded_previous.txt
-    cat downloaded_previous.txt
 
-    set +x
+    echo "### downloaded_previous.txt"
+    cat downloaded_previous.txt
+    wc -l downloaded_previous.txt && echo "### downloaded_previous.txt wc -l"
 
     ''', title)
   }
@@ -146,11 +136,15 @@ def uploadPrevious(title) {
   withGcpServiceAccount.fromVaultSecret(vaultPath(), 'value') {
     kibanaPipeline.bash('''
 
-    set -x
+    collectPrevious() {
+      PREVIOUS=$(git log --pretty=format:%h -1)
+      echo "### PREVIOUS: ${PREVIOUS}"
+      echo $PREVIOUS > previous.txt
+    }
+    collectPrevious
 
-    gsutil cp previous.txt gs://elastic-bekitzur-kibana-coverage-live/previous_pointer/
+    gsutil cp previous.txt gs://elastic-bekitzur-kibana-coverage-live/previous_pointer
 
-    set +x
 
     ''', title)
 
