@@ -1,19 +1,18 @@
-def bootMergeAndIngest(buildNum, buildUrl) {
+//def injest(buildNum, buildUrl, title) {
+def injest(int[] args) {
   def vaultSecret = 'secret/kibana-issues/prod/coverage/elasticsearch'
   withVaultSecret(secret: vaultSecret, secret_field: 'host', variable_name: 'HOST_FROM_VAULT') {
     withVaultSecret(secret: vaultSecret, secret_field: 'username', variable_name: 'USER_FROM_VAULT') {
       withVaultSecret(secret: vaultSecret, secret_field: 'password', variable_name: 'PASS_FROM_VAULT') {
-        println "### buildNum: $buildNum"
-        println "### buildUrl: $buildUrl"
-        ingest(BUILD_NUMBER, BUILD_URL)
+//        bootMergeAndIngest(buildNum, buildUrl, title)
+        bootMergeAndIngest(*args)
       }
     }
   }
 
 }
 
-def ingest(buildNum, buildUrl) {
-  def title = '### Merge and Ingest Code Coverage'
+def bootMergeAndIngest(buildNum, buildUrl, title) {
   kibanaPipeline.bash("""
 
     source src/dev/ci_setup/setup_env.sh
@@ -46,10 +45,13 @@ def vaultPath() {
   return "secret/gce/elastic-bekitzur/service-account/kibana"
 }
 
-def uploadCoverageStaticData(timestamp) {
-  def prefix = gcpSite()
+def uploadCoverageStaticData(timestamp, title) {
 
-  uploadPrevious("previous.txt", "${prefix}previous_pointer/previous.txt")
+  kibanaPipeline.bash('''
+    echo "### QA Rocks!
+  ''', title)
+
+  def prefix = gcpSite()
 
   uploadList(prefix, ['src/dev/code_coverage/www/index.html', 'src/dev/code_coverage/www/404.html'])
 
@@ -112,6 +114,9 @@ def collectVcsInfo(title) {
       echo "${XS[X]}" >> VCS_INFO.txt
     }
     done
+
+    echo "### VCS_INFO:"
+    cat VCS_INFO.txt
 
     ''', title
   )
