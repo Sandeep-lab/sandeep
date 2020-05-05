@@ -123,8 +123,12 @@ const truncateCommitMsg = x => {
 };
 
 export const itemizeVcs = vcsInfo => obj => {
-  // const [previousSha, branch, sha, author, commitMsg] = vcsInfo;
   const [branch, sha, author, commitMsg] = vcsInfo;
+  const prefix = 'https://github.com/elastic/kibana/compare';
+  const vcsCompareUrl = process.env.FETCHED_PREVIOUS
+    ? `${prefix}/${process.env.FETCHED_PREVIOUS}...${sha}`
+    : 'PREVIOUS SHA NOT PROVIDED';
+
   return {
     ...obj,
     vcs: {
@@ -132,8 +136,7 @@ export const itemizeVcs = vcsInfo => obj => {
       sha,
       author,
       commitMsg: truncateCommitMsg(commitMsg),
-      // vcsCommitUrl: `https://github.com/elastic/kibana/commit/${sha}`,
-      // vcsCompareUrl: `https://github.com/elastic/kibana/compare/${previousSha}...${sha}`,
+      vcsCompareUrl,
     },
   };
 };
