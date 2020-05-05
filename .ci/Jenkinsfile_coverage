@@ -11,9 +11,8 @@ kibanaPipeline(timeoutMinutes: 240) {
       'CODE_COVERAGE=1', // Enables coverage.  Needed for multiple ci scripts, such as remote.ts, test/scripts/*.sh, schema.js, etc.
     ]) {
       workers.base(name: 'coverage-worker', size: 'l', ramDisk: false, bootstrapped: false) {
-        handlePrevious()
 //        kibanaCoverage.runTests()
-//        handleIngestion(TIME_STAMP)
+        handleIngestion(TIME_STAMP)
       }
     }
     kibanaPipeline.sendMail()
@@ -21,13 +20,13 @@ kibanaPipeline(timeoutMinutes: 240) {
 }
 
 def handleIngestion(timestamp) {
-  kibanaPipeline.downloadCoverageArtifacts()
-  kibanaCoverage.collectVcsInfo("### Collect VCS Info")
-  kibanaCoverage.ingest(timestamp, '### Injest && Upload')
-  kibanaCoverage.uploadCoverageStaticSite(timestamp)
+  handleVcsData()
+//  kibanaPipeline.downloadCoverageArtifacts()
+//  kibanaCoverage.ingest(timestamp, '### Injest && Upload')
+//  kibanaCoverage.uploadCoverageStaticSite(timestamp)
 }
 
-def handlePrevious() {
+def handleVcsData() {
   kibanaCoverage.downloadPrevious('### Download OLD Previous')
   kibanaCoverage.collectVcsInfo('### Collect NEW VCS Info')
   kibanaCoverage.uploadPrevious('### Upload NEW Previous')
