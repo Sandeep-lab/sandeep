@@ -132,7 +132,7 @@ export class SavedObjectsRepository {
     typeRegistry: SavedObjectTypeRegistry,
     indexName: string,
     callCluster: APICaller,
-    includedHiddenTypes: string[] = [],
+    extraTypes: string[] = [],
     injectedConstructor: any = SavedObjectsRepository
   ): ISavedObjectsRepository {
     const mappings = migrator.getActiveMappings();
@@ -140,14 +140,14 @@ export class SavedObjectsRepository {
     const serializer = new SavedObjectsSerializer(typeRegistry);
     const visibleTypes = allTypes.filter(type => !typeRegistry.isHidden(type));
 
-    const missingTypeMappings = includedHiddenTypes.filter(type => !allTypes.includes(type));
+    const missingTypeMappings = extraTypes.filter(type => !allTypes.includes(type));
     if (missingTypeMappings.length > 0) {
       throw new Error(
         `Missing mappings for saved objects types: '${missingTypeMappings.join(', ')}'`
       );
     }
 
-    const allowedTypes = [...new Set(visibleTypes.concat(includedHiddenTypes))];
+    const allowedTypes = [...new Set(visibleTypes.concat(extraTypes))];
 
     return new injectedConstructor({
       index: indexName,

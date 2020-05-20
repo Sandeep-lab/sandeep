@@ -5,7 +5,6 @@
  */
 
 import { EncryptedSavedObjectsPluginSetup, EncryptedSavedObjectsPluginStart } from './plugin';
-import { EncryptedSavedObjectsClient } from './saved_objects';
 
 function createEncryptedSavedObjectsSetupMock() {
   return {
@@ -18,18 +17,11 @@ function createEncryptedSavedObjectsSetupMock() {
 function createEncryptedSavedObjectsStartMock() {
   return {
     isEncryptionError: jest.fn(),
-    getClient: jest.fn(() => createEncryptedSavedObjectsClienttMock()),
-  } as jest.Mocked<EncryptedSavedObjectsPluginStart>;
-}
-
-function createEncryptedSavedObjectsClienttMock() {
-  return {
     getDecryptedAsInternalUser: jest.fn(),
-  } as jest.Mocked<EncryptedSavedObjectsClient>;
+  } as jest.Mocked<EncryptedSavedObjectsPluginStart>;
 }
 
 export const encryptedSavedObjectsMock = {
   createSetup: createEncryptedSavedObjectsSetupMock,
   createStart: createEncryptedSavedObjectsStartMock,
-  createClient: createEncryptedSavedObjectsClienttMock,
 };

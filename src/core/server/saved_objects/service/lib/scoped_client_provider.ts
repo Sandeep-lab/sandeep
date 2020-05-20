@@ -46,10 +46,8 @@ export type SavedObjectsClientWrapperFactory = (
  */
 export type SavedObjectsClientFactory = ({
   request,
-  includedHiddenTypes,
 }: {
   request: KibanaRequest;
-  includedHiddenTypes?: string[];
 }) => SavedObjectsClientContract;
 
 /**
@@ -66,7 +64,6 @@ export type SavedObjectsClientFactoryProvider = (
  */
 export interface SavedObjectsClientProviderOptions {
   excludedWrappers?: string[];
-  includedHiddenTypes?: string[];
 }
 
 /**
@@ -124,12 +121,13 @@ export class SavedObjectsClientProvider {
 
   getClient(
     request: KibanaRequest,
-    { includedHiddenTypes, excludedWrappers = [] }: SavedObjectsClientProviderOptions = {}
+    options: SavedObjectsClientProviderOptions = {}
   ): SavedObjectsClientContract {
     const client = this._clientFactory({
       request,
-      includedHiddenTypes,
     });
+
+    const excludedWrappers = options.excludedWrappers || [];
 
     return this._wrapperFactories
       .toPrioritizedArray()

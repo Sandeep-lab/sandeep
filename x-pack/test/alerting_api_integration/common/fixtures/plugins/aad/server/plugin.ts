@@ -48,11 +48,9 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
           if (spaces && req.body.spaceId) {
             namespace = spaces.spacesService.spaceIdToNamespace(req.body.spaceId);
           }
-          await encryptedSavedObjects
-            .getClient()
-            .getDecryptedAsInternalUser(req.body.type, req.body.id, {
-              namespace,
-            });
+          await encryptedSavedObjects.getDecryptedAsInternalUser(req.body.type, req.body.id, {
+            namespace,
+          });
           return res.ok({ body: { success: true } });
         } catch (err) {
           return res.internalError({ body: err });

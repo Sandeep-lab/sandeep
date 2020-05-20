@@ -9,7 +9,7 @@ import { AlertsClient } from './alerts_client';
 import { AlertTypeRegistry, SpaceIdToNamespaceFunction } from './types';
 import { KibanaRequest, Logger, SavedObjectsClientContract } from '../../../../src/core/server';
 import { InvalidateAPIKeyParams, SecurityPluginSetup } from '../../../plugins/security/server';
-import { EncryptedSavedObjectsClient } from '../../../plugins/encrypted_saved_objects/server';
+import { EncryptedSavedObjectsPluginStart } from '../../../plugins/encrypted_saved_objects/server';
 import { TaskManagerStartContract } from '../../../plugins/task_manager/server';
 
 export interface AlertsClientFactoryOpts {
@@ -19,7 +19,7 @@ export interface AlertsClientFactoryOpts {
   securityPluginSetup?: SecurityPluginSetup;
   getSpaceId: (request: KibanaRequest) => string | undefined;
   spaceIdToNamespace: SpaceIdToNamespaceFunction;
-  encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
+  encryptedSavedObjectsPlugin: EncryptedSavedObjectsPluginStart;
   preconfiguredActions: PreConfiguredAction[];
 }
 
@@ -31,7 +31,7 @@ export class AlertsClientFactory {
   private securityPluginSetup?: SecurityPluginSetup;
   private getSpaceId!: (request: KibanaRequest) => string | undefined;
   private spaceIdToNamespace!: SpaceIdToNamespaceFunction;
-  private encryptedSavedObjectsClient!: EncryptedSavedObjectsClient;
+  private encryptedSavedObjectsPlugin!: EncryptedSavedObjectsPluginStart;
   private preconfiguredActions!: PreConfiguredAction[];
 
   public initialize(options: AlertsClientFactoryOpts) {
@@ -45,7 +45,7 @@ export class AlertsClientFactory {
     this.alertTypeRegistry = options.alertTypeRegistry;
     this.securityPluginSetup = options.securityPluginSetup;
     this.spaceIdToNamespace = options.spaceIdToNamespace;
-    this.encryptedSavedObjectsClient = options.encryptedSavedObjectsClient;
+    this.encryptedSavedObjectsPlugin = options.encryptedSavedObjectsPlugin;
     this.preconfiguredActions = options.preconfiguredActions;
   }
 
@@ -62,7 +62,7 @@ export class AlertsClientFactory {
       alertTypeRegistry: this.alertTypeRegistry,
       savedObjectsClient,
       namespace: this.spaceIdToNamespace(spaceId),
-      encryptedSavedObjectsClient: this.encryptedSavedObjectsClient,
+      encryptedSavedObjectsPlugin: this.encryptedSavedObjectsPlugin,
       async getUserName() {
         if (!securityPluginSetup) {
           return null;
