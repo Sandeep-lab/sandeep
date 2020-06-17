@@ -14,27 +14,30 @@ import {
 } from '../../common/suites/resolve_import_errors';
 
 const { fail400, fail409 } = testCaseFailures;
+const newId = (condition?: boolean) => (condition !== false ? { successParam: 'newId' } : {});
 
 const createTestCases = (overwrite: boolean) => {
   // for each permitted (non-403) outcome, if failure !== undefined then we expect
   // to receive an error; otherwise, we expect to receive a success result
-  const importableTypes = [
+  const group1Importable = [
     { ...CASES.SINGLE_NAMESPACE_DEFAULT_SPACE, ...fail409(!overwrite) },
-    CASES.SINGLE_NAMESPACE_SPACE_1,
-    CASES.SINGLE_NAMESPACE_SPACE_2,
     { ...CASES.NAMESPACE_AGNOSTIC, ...fail409(!overwrite) },
-    CASES.NEW_SINGLE_NAMESPACE_OBJ,
-    CASES.NEW_NAMESPACE_AGNOSTIC_OBJ,
   ];
-  const nonImportableTypes = [
-    { ...CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1, ...fail400() },
-    { ...CASES.MULTI_NAMESPACE_ONLY_SPACE_1, ...fail400() },
-    { ...CASES.MULTI_NAMESPACE_ONLY_SPACE_2, ...fail400() },
-    { ...CASES.HIDDEN, ...fail400() },
-    { ...CASES.NEW_MULTI_NAMESPACE_OBJ, ...fail400() },
+  const group1NonImportable = [{ ...CASES.HIDDEN, ...fail400() }];
+  const group1All = [...group1Importable, ...group1NonImportable];
+  const group2 = [
+    { ...CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1, ...fail409(!overwrite) },
+    // all of the cases below represent imports that had an inexact match conflict or an ambiguous conflict
+    // if we call _resolve_import_errors and don't specify overwrite or duplicate, each of these will not result in a conflict because they
+    // will skip the preflight search results; so the objects will be created instead.
+    { ...CASES.CONFLICT_1A_OBJ, ...newId(overwrite) }, // "ambiguous source" conflict; if overwrite=true, will overwrite 'conflict_1'
+    CASES.CONFLICT_1B_OBJ, // "ambiguous source" conflict; if overwrite=true, will create a new object (since 'conflict_1a' is overwriting 'conflict_1')
+    { ...CASES.CONFLICT_2C_OBJ, ...newId(overwrite) }, // "ambiguous source and destination" conflict; if overwrite=true, will overwrite 'conflict_2a'
+    { ...CASES.CONFLICT_2D_OBJ, ...newId(overwrite) }, // "ambiguous source and destination" conflict; if overwrite=true, will overwrite 'conflict_2b'
+    { ...CASES.CONFLICT_3A_OBJ, ...newId(overwrite) }, // "inexact match" conflict; if overwrite=true, will overwrite 'conflict_3'
+    { ...CASES.CONFLICT_4_OBJ, ...newId(overwrite) }, // "inexact match" conflict; if overwrite=true, will overwrite 'conflict_4a'
   ];
-  const allTypes = importableTypes.concat(nonImportableTypes);
-  return { importableTypes, nonImportableTypes, allTypes };
+  return { group1Importable, group1NonImportable, group1All, group2 };
 };
 
 export default function ({ getService }: FtrProviderContext) {
@@ -48,18 +51,24 @@ export default function ({ getService }: FtrProviderContext) {
     supertest
   );
   const createTests = (overwrite: boolean) => {
-    const { importableTypes, nonImportableTypes, allTypes } = createTestCases(overwrite);
+    const { group1Importable, group1NonImportable, group1All, group2 } = createTestCases(overwrite);
     // use singleRequest to reduce execution time and/or test combined cases
     return {
       unauthorized: [
-        createTestDefinitions(importableTypes, true, overwrite),
-        createTestDefinitions(nonImportableTypes, false, overwrite, { singleRequest: true }),
-        createTestDefinitions(allTypes, true, overwrite, {
+        createTestDefinitions(group1Importable, true, overwrite),
+        createTestDefinitions(group1NonImportable, false, overwrite, {
           singleRequest: true,
-          responseBodyOverride: expectForbidden(['dashboard', 'globaltype', 'isolatedtype']),
         }),
+        createTestDefinitions(group1All, true, overwrite, {
+          singleRequest: true,
+          responseBodyOverride: expectForbidden(['globaltype', 'isolatedtype']),
+        }),
+        createTestDefinitions(group2, true, overwrite, { singleRequest: true }),
       ].flat(),
-      authorized: createTestDefinitions(allTypes, false, overwrite, { singleRequest: true }),
+      authorized: [
+        createTestDefinitions(group1All, false, overwrite, { singleRequest: true }),
+        createTestDefinitions(group2, false, overwrite, { singleRequest: true }),
+      ].flat(),
     };
   };
 

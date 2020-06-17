@@ -17,6 +17,7 @@ export interface SavedObjectsImportRetry
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [id](./kibana-plugin-core-public.savedobjectsimportretry.id.md) | <code>string</code> |  |
+|  [idToOverwrite](./kibana-plugin-core-public.savedobjectsimportretry.idtooverwrite.md) | <code>string</code> | The object ID that will be overwritten. Only used if <code>overwrite</code> == true. This is required to resolve ambiguous conflicts. |
 |  [overwrite](./kibana-plugin-core-public.savedobjectsimportretry.overwrite.md) | <code>boolean</code> |  |
 |  [replaceReferences](./kibana-plugin-core-public.savedobjectsimportretry.replacereferences.md) | <code>Array&lt;{</code><br/><code>        type: string;</code><br/><code>        from: string;</code><br/><code>        to: string;</code><br/><code>    }&gt;</code> |  |
 |  [type](./kibana-plugin-core-public.savedobjectsimportretry.type.md) | <code>string</code> |  |

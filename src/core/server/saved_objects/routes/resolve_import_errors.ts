@@ -48,19 +48,29 @@ export const registerResolveImportErrorsRoute = (router: IRouter, config: SavedO
         body: schema.object({
           file: schema.stream(),
           retries: schema.arrayOf(
-            schema.object({
-              type: schema.string(),
-              id: schema.string(),
-              overwrite: schema.boolean({ defaultValue: false }),
-              replaceReferences: schema.arrayOf(
-                schema.object({
-                  type: schema.string(),
-                  from: schema.string(),
-                  to: schema.string(),
-                }),
-                { defaultValue: [] }
-              ),
-            })
+            schema.object(
+              {
+                type: schema.string(),
+                id: schema.string(),
+                overwrite: schema.boolean({ defaultValue: false }),
+                idToOverwrite: schema.maybe(schema.string()),
+                replaceReferences: schema.arrayOf(
+                  schema.object({
+                    type: schema.string(),
+                    from: schema.string(),
+                    to: schema.string(),
+                  }),
+                  { defaultValue: [] }
+                ),
+              },
+              {
+                validate: (object) => {
+                  if (object.idToOverwrite && !object.overwrite) {
+                    return 'cannot use [idToOverwrite] without [overwrite]';
+                  }
+                },
+              }
+            )
           ),
         }),
       },
@@ -72,12 +82,8 @@ export const registerResolveImportErrorsRoute = (router: IRouter, config: SavedO
         return res.badRequest({ body: `Invalid file extension ${fileExtension}` });
       }
 
-      const supportedTypes = context.core.savedObjects.typeRegistry
-        .getImportableAndExportableTypes()
-        .map((type) => type.name);
-
       const result = await resolveSavedObjectsImportErrors({
-        supportedTypes,
+        typeRegistry: context.core.savedObjects.typeRegistry,
         savedObjectsClient: context.core.savedObjects.client,
         readStream: createSavedObjectsStreamFromNdJson(file),
         retries: req.body.retries,

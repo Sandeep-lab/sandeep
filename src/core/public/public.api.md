@@ -1164,12 +1164,15 @@ export interface SavedObject<T = unknown> {
     attributes: T;
     // (undocumented)
     error?: {
+        error: string;
         message: string;
         statusCode: number;
+        metadata?: Record<string, unknown>;
     };
     id: string;
     migrationVersion?: SavedObjectsMigrationVersion;
     namespaces?: string[];
+    originId?: string;
     references: SavedObjectReference[];
     type: string;
     updated_at?: string;
@@ -1290,6 +1293,7 @@ export interface SavedObjectsFindOptions extends SavedObjectsBaseOptions {
     // (undocumented)
     perPage?: number;
     preference?: string;
+    rawSearchFields?: string[];
     search?: string;
     searchFields?: string[];
     // (undocumented)
@@ -1311,7 +1315,27 @@ export interface SavedObjectsFindResponsePublic<T = unknown> extends SavedObject
 }
 
 // @public
+export interface SavedObjectsImportAmbiguousConflictError {
+    // (undocumented)
+    destinations: Array<{
+        id: string;
+        title?: string;
+        updatedAt?: string;
+    }>;
+    // (undocumented)
+    sources: Array<{
+        id: string;
+        title?: string;
+        updatedAt?: string;
+    }>;
+    // (undocumented)
+    type: 'ambiguous_conflict';
+}
+
+// @public
 export interface SavedObjectsImportConflictError {
+    // (undocumented)
+    destinationId?: string;
     // (undocumented)
     type: 'conflict';
 }
@@ -1319,7 +1343,7 @@ export interface SavedObjectsImportConflictError {
 // @public
 export interface SavedObjectsImportError {
     // (undocumented)
-    error: SavedObjectsImportConflictError | SavedObjectsImportUnsupportedTypeError | SavedObjectsImportMissingReferencesError | SavedObjectsImportUnknownError;
+    error: SavedObjectsImportConflictError | SavedObjectsImportAmbiguousConflictError | SavedObjectsImportUnsupportedTypeError | SavedObjectsImportMissingReferencesError | SavedObjectsImportUnknownError;
     // (undocumented)
     id: string;
     // (undocumented)
@@ -1352,12 +1376,15 @@ export interface SavedObjectsImportResponse {
     success: boolean;
     // (undocumented)
     successCount: number;
+    // (undocumented)
+    successResults?: SavedObjectsImportSuccess[];
 }
 
 // @public
 export interface SavedObjectsImportRetry {
     // (undocumented)
     id: string;
+    idToOverwrite?: string;
     // (undocumented)
     overwrite: boolean;
     // (undocumented)
@@ -1366,6 +1393,15 @@ export interface SavedObjectsImportRetry {
         from: string;
         to: string;
     }>;
+    // (undocumented)
+    type: string;
+}
+
+// @public
+export interface SavedObjectsImportSuccess {
+    // (undocumented)
+    id: string;
+    newId?: string;
     // (undocumented)
     type: string;
 }
