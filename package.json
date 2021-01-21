@@ -196,7 +196,7 @@
     "hoek": "^5.0.4",
     "http-proxy-agent": "^2.1.0",
     "https-proxy-agent": "^5.0.0",
-    "immer": "^1.5.0",
+    "immer": "^8.0.1",
     "inert": "^5.1.0",
     "inline-style": "^2.0.0",
     "joi": "^13.5.2",
