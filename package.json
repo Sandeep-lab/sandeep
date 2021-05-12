@@ -484,7 +484,7 @@
     "pixelmatch": "^5.1.0",
     "pkg-up": "^2.0.0",
     "pngjs": "^3.4.0",
-    "postcss": "^7.0.26",
+    "postcss": "^8.2.10",
     "postcss-url": "^8.0.0",
     "prettier": "^2.0.5",
     "proxyquire": "1.8.0",
