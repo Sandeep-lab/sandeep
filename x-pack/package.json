@@ -288,7 +288,7 @@
     "lz-string": "^1.4.4",
     "mapbox-gl": "^1.10.0",
     "mapbox-gl-draw-rectangle-mode": "^1.0.4",
-    "markdown-it": "^10.0.0",
+    "markdown-it": "^12.3.2",
     "memoize-one": "^5.0.0",
     "mime": "^2.4.4",
     "moment": "^2.24.0",
